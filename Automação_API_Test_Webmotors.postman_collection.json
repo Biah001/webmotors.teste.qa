@@ -1,0 +1,358 @@
+{
+	"info": {
+		"_postman_id": "1805085f-2ae1-4cd8-969e-b77e3205bdac",
+		"name": "Automação_API_Test_Webmotors",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Lista Marcas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let Ajv = require('ajv'),\r",
+							"    ajv = new Ajv({logger: console})\r",
+							"\r",
+							"let resp = pm.response.json()\r",
+							"let schema = {\r",
+							"    type: 'array',\r",
+							"    required: ['ID', 'Name'],\r",
+							"        properties: {\r",
+							"                ID: {\r",
+							"                    type: 'integer',\r",
+							"                },\r",
+							"                Name: {\r",
+							"                    type: 'string'\r",
+							"                }\r",
+							"        }\r",
+							"}\r",
+							"\r",
+							"console.log(pm.response.json())\r",
+							"\r",
+							"pm.test(\"Status code é 200\", () => {\r",
+							"  pm.expect(pm.response.code).to.eql(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Contém lista de retorno \", () => {\r",
+							"   pm.expect(pm.response.json()).to.be.a('array');\r",
+							"});\r",
+							"\r",
+							" pm.test(\"Retorno é valido e contém body\", function () {\r",
+							"     pm.response.to.be.ok;\r",
+							"     pm.response.to.be.withBody;\r",
+							"     pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"console.log(ajv.validate(schema, pm.response.json()))\r",
+							"\r",
+							"tests['O contrato é válido'] = pm.expect(ajv.validate(schema, pm.response.json()), JSON.stringify(ajv.errors)).to.be.true;\r",
+							"\r",
+							"// _________________________________________________________________________________________________________________________________\r",
+							"\r",
+							"// Encontrar dados da marca Chevrolet\r",
+							"function buscaMarca(element){ return element.Name === 'Chevrolet' }\r",
+							"let marcaRetorno = resp.find(buscaMarca)\r",
+							"\r",
+							"pm.environment.set(\"marcaId\", marcaRetorno.ID)\r",
+							"pm.environment.set(\"marcaNome\", marcaRetorno.Name)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{url}}api/OnlineChallenge/Make",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"OnlineChallenge",
+						"Make"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Lista Modelos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let Ajv = require('ajv'),\r",
+							"    ajv = new Ajv({logger: console})\r",
+							"\r",
+							"let resp = pm.response.json()\r",
+							"let schema = {\r",
+							"    type: 'array',\r",
+							"    required: ['ID', 'Name','MakeID'],\r",
+							"    properties: {\r",
+							"                    ID: {\r",
+							"                        type: 'integer',\r",
+							"                    },\r",
+							"                    Name: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    MakeID: {\r",
+							"                        type: 'integer'\r",
+							"                    },\r",
+							"                }\r",
+							"}\r",
+							"\r",
+							"console.log(pm.response.json())\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"const marcaID = pm.variables.get(\"marcaId\");\r",
+							"\r",
+							"pm.test(\"Status code é 200\", () => {\r",
+							"  pm.expect(pm.response.code).to.eql(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Contém lista de retorno \", () => {\r",
+							"   pm.expect(pm.response.json()).to.be.a('array');\r",
+							"});\r",
+							"\r",
+							" pm.test(\"Verifica MakeID 1 \", () => {\r",
+							"     pm.expect(responseJson[1].MakeID == marcaID);\r",
+							" });\r",
+							"\r",
+							" pm.test(\"Retorno é valido e contém body\", function () {\r",
+							"     pm.response.to.be.ok;\r",
+							"     pm.response.to.be.withBody;\r",
+							"     pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"tests['O contrato é válido'] = pm.expect(ajv.validate(schema, pm.response.json()), JSON.stringify(ajv.errors)).to.be.true;\r",
+							"\r",
+							"// _________________________________________________________________________________________________________________________________\r",
+							"\r",
+							"// Encontrar dados da modelo Agile\r",
+							"function buscaModelo(element){ return element.Name === 'Agile' }\r",
+							"let modeloRetorno = resp.find(buscaModelo)\r",
+							"\r",
+							"pm.environment.set(\"modeloId\", modeloRetorno.ID)\r",
+							"pm.environment.set(\"modeloNome\", modeloRetorno.Name)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}api/OnlineChallenge/Model?MakeID={{marcaId}}",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"OnlineChallenge",
+						"Model"
+					],
+					"query": [
+						{
+							"key": "MakeID",
+							"value": "{{marcaId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Lista Versões",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let Ajv = require('ajv'),\r",
+							"    ajv = new Ajv({logger: console})\r",
+							"\r",
+							"let resp = pm.response.json()\r",
+							"let schema = {\r",
+							"    type: 'array',\r",
+							"    required: ['ID', 'Name','ModelID'],\r",
+							"    properties: {\r",
+							"                    ID: {\r",
+							"                        type: 'integer',\r",
+							"                    },\r",
+							"                    Name: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    ModelID: {\r",
+							"                        type: 'integer'\r",
+							"                    },\r",
+							"                }\r",
+							"            }\r",
+							"\r",
+							"console.log(pm.response.json())\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"const modelId = pm.variables.get(\"modelId\");\r",
+							"\r",
+							"pm.test(\"Status code é 200\", () => {\r",
+							"  pm.expect(pm.response.code).to.eql(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Contém lista de retorno \", () => {\r",
+							"   pm.expect(pm.response.json()).to.be.a('array');\r",
+							"});\r",
+							"\r",
+							" pm.test(\"Verifica modelId  \", () => {\r",
+							"     pm.expect(responseJson[1].ModelID == modelId);\r",
+							" });\r",
+							"\r",
+							"\r",
+							"tests['O contrato é válido'] = pm.expect(ajv.validate(schema, pm.response.json()), JSON.stringify(ajv.errors)).to.be.true;\r",
+							"\r",
+							"// _________________________________________________________________________________________________________________________________\r",
+							"\r",
+							"// Encontrar dados da versão\r",
+							"function BuscaVersao(element){ return element.ID === 6 }\r",
+							"let versaoRetorno = resp.find(BuscaVersao)\r",
+							"\r",
+							"pm.environment.set(\"versaoId\", versaoRetorno.ID)\r",
+							"pm.environment.set(\"versaoNome\", versaoRetorno.Name)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}api/OnlineChallenge/Version?ModelID={{modeloId}}",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"OnlineChallenge",
+						"Version"
+					],
+					"query": [
+						{
+							"key": "ModelID",
+							"value": "{{modeloId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Lista Veiculos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let Ajv = require('ajv'),\r",
+							"    ajv = new Ajv({logger: console})\r",
+							"\r",
+							"let resp = pm.response.json()\r",
+							"let schema = {\r",
+							"    type: 'array',\r",
+							"    required: ['ID', 'Make','Model','Version','Image','KM','Price','YearModel','YearFab','Color'],\r",
+							"    properties: {\r",
+							"                    ID: {\r",
+							"                        type: 'integer',\r",
+							"                    },\r",
+							"                    Make: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    Model: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    Version: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    Image: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    KM: {\r",
+							"                        type: 'integer'\r",
+							"                    },\r",
+							"                    Price: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                    YearModel: {\r",
+							"                        type: 'integer'\r",
+							"                    },\r",
+							"                    YearFab: {\r",
+							"                        type: 'integer'\r",
+							"                    },\r",
+							"                    Color: {\r",
+							"                        type: 'string'\r",
+							"                    },\r",
+							"                }\r",
+							"            }\r",
+							"\r",
+							"console.log(pm.response.json())\r",
+							"\r",
+							"pm.test(\"Status code é 200\", () => {\r",
+							"  pm.expect(pm.response.code).to.eql(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Contém lista de retorno \", () => {\r",
+							"   pm.expect(pm.response.json()).to.be.a('array');\r",
+							"});\r",
+							"\r",
+							" pm.test(\"Retorno é valido e contém body\", function () {\r",
+							"     pm.response.to.be.ok;\r",
+							"     pm.response.to.be.withBody;\r",
+							"     pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"tests['O contrato é válido'] = pm.expect(ajv.validate(schema, pm.response.json()), JSON.stringify(ajv.errors)).to.be.true;\r",
+							"\r",
+							"// _________________________________________________________________________________________________________________________________\r",
+							"\r",
+							"// Encontrar dados da versão\r",
+							"function buscaVersao(element){ return element.Version === '2.0 EVO 4P AUTOMÁTICO' }\r",
+							"let versaoRetorno = resp.find(buscaVersao)\r",
+							"\r",
+							"pm.environment.set(\"veiculoId\", versaoRetorno.ID)\r",
+							"pm.environment.set(\"veiculoNome\", versaoRetorno.Model)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}api/OnlineChallenge/Vehicles?Page=1",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"OnlineChallenge",
+						"Vehicles"
+					],
+					"query": [
+						{
+							"key": "Page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
